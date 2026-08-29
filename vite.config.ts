@@ -6,7 +6,10 @@ import { defineConfig } from 'vite'
 // GitHub Pages serves project sites from a subpath (/<repo-name>/), so the
 // production build needs that as its base — but local dev/preview should
 // keep running at root. GITHUB_PAGES is set by the deploy workflow only.
-const base = process.env.GITHUB_PAGES ? '/Gym-tracker-app/' : '/'
+// The Vercel deploy serves this app as a /gym/ zone proxied from the meal
+// app's domain (so the two apps share localStorage on one origin) — VERCEL
+// is set automatically by Vercel's build environment.
+const base = process.env.GITHUB_PAGES ? '/Gym-tracker-app/' : process.env.VERCEL ? '/gym/' : '/'
 
 // https://vite.dev/config/
 export default defineConfig({

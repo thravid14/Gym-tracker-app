@@ -6,10 +6,15 @@ const tabs = [
   { to: '/split', label: 'Split', icon: '🧩' },
 ]
 
+// Meal-prep app link is a full page navigation (not a route inside this app's
+// own HashRouter) — only meaningful when the two apps are proxied under one
+// domain (Vercel), so it's hidden on the GitHub Pages build.
+const showMealAppLink = import.meta.env.BASE_URL === '/gym/'
+
 export function NavBar() {
   return (
     <nav
-      className="sticky bottom-0 z-10 grid grid-cols-3 border-t"
+      className={`sticky bottom-0 z-10 grid border-t ${showMealAppLink ? 'grid-cols-4' : 'grid-cols-3'}`}
       style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
     >
       {tabs.map((tab) => (
@@ -30,6 +35,16 @@ export function NavBar() {
           {tab.label}
         </NavLink>
       ))}
+      {showMealAppLink && (
+        <a
+          href="/"
+          className="flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium"
+          style={{ color: 'var(--text-muted)' }}
+        >
+          <span className="text-lg leading-none">🥗</span>
+          Meals
+        </a>
+      )}
     </nav>
   )
 }

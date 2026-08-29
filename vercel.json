@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/gym", "destination": "/index.html" },
+    { "source": "/gym/(.*)", "destination": "/$1" }
+  ]
+}

@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo, type ReactNode } from 'react'
 import { newId, usePersistedState } from '../lib/storage'
+import { markWorkoutToday } from '../lib/sharedData'
 import type {
   BodyWeightEntry,
   LoggedExercise,
@@ -182,6 +183,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
           ),
         )
         setActiveSessionId((prev) => (prev === sessionId ? null : prev))
+        markWorkoutToday()
       },
 
       deleteSession: (sessionId) => {
