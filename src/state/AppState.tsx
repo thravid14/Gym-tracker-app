@@ -1,6 +1,5 @@
 import { createContext, useContext, useMemo, type ReactNode } from 'react'
 import { newId, usePersistedState } from '../lib/storage'
-import { getExerciseById } from '../lib/exercises'
 import type { LoggedExercise, SetEntry, Split, SplitDay, WorkoutSession } from '../types'
 
 interface AppStateValue {
@@ -187,7 +186,3 @@ export function useAppState(): AppStateValue {
   if (!ctx) throw new Error('useAppState must be used within AppStateProvider')
   return ctx
 }
-
-// Re-exported for convenience where a screen needs exercise metadata for a
-// logged entry that may reference an exercise no longer easily found by id.
-export { getExerciseById }
