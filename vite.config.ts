@@ -6,7 +6,7 @@ import { defineConfig } from 'vite'
 // GitHub Pages serves project sites from a subpath (/<repo-name>/), so the
 // production build needs that as its base — but local dev/preview should
 // keep running at root. GITHUB_PAGES is set by the deploy workflow only.
-const base = process.env.GITHUB_PAGES ? '/gym-tracker-app/' : '/'
+const base = process.env.GITHUB_PAGES ? '/Gym-tracker-app/' : '/'
 
 // https://vite.dev/config/
 export default defineConfig({

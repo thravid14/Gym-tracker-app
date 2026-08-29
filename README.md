@@ -37,13 +37,13 @@ repo is published to GitHub:
 1. Repo **Settings → Pages → Source** → select **GitHub Actions**
 2. Push to `master` (or run the workflow manually from the Actions tab) — it
    builds with `GITHUB_PAGES=true` (see `vite.config.ts`), which switches the
-   base path to `/gym-tracker-app/` to match a GitHub Pages project site's
+   base path to `/Gym-tracker-app/` to match a GitHub Pages project site's
    URL. Local `npm run dev` / `npm run build` are unaffected and still run
    at root.
-3. The site appears at `https://<your-username>.github.io/gym-tracker-app/`
+3. The site appears at `https://<your-username>.github.io/Gym-tracker-app/`
    — check the Actions tab for the exact URL and deploy status.
 
-If the repo is ever renamed, update the hardcoded `/gym-tracker-app/` path in
+If the repo is ever renamed, update the hardcoded `/Gym-tracker-app/` path in
 `vite.config.ts` to match.
 
 ## Development
