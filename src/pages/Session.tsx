@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAppState } from '../state/AppState'
+import { suggestNextSet } from '../lib/suggestions'
 import { Button, Card, EmptyState, PageHeader } from '../components/ui'
 import type { LoggedExercise } from '../types'
 
@@ -62,6 +63,7 @@ function ExerciseBlock({ sessionId, logged }: { sessionId: string; logged: Logge
 
   const history = getExerciseHistory(logged.exerciseId, sessionId)
   const last = history[0]
+  const suggestion = last ? suggestNextSet(last.logged.sets) : null
 
   function handleAddSet() {
     const r = Number(reps)
@@ -77,6 +79,11 @@ function ExerciseBlock({ sessionId, logged }: { sessionId: string; logged: Logge
     for (const s of last.logged.sets) {
       addSet(sessionId, logged.id, { reps: s.reps, weight: s.weight })
     }
+  }
+
+  function tryIt() {
+    if (!suggestion) return
+    addSet(sessionId, logged.id, { reps: suggestion.reps, weight: suggestion.weight })
   }
 
   return (
@@ -98,11 +105,21 @@ function ExerciseBlock({ sessionId, logged }: { sessionId: string; logged: Logge
       </div>
 
       {last && (
-        <p className="mb-2 text-xs" style={{ color: 'var(--text-muted)' }}>
+        <p className="mb-1 text-xs" style={{ color: 'var(--text-muted)' }}>
           Last time: {last.logged.sets.map((s) => `${s.weight}×${s.reps}`).join(', ')}
           {' · '}
           <button className="underline" onClick={repeatLast}>
             Repeat
+          </button>
+        </p>
+      )}
+
+      {suggestion && (
+        <p className="mb-2 text-xs" style={{ color: 'var(--accent)' }}>
+          Suggested: {suggestion.weight}kg × {suggestion.reps} ({suggestion.label})
+          {' · '}
+          <button className="underline" onClick={tryIt}>
+            Try it
           </button>
         </p>
       )}

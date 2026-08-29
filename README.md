@@ -22,8 +22,11 @@ client-side and is installable as an offline PWA.
 - **Today** — see today's split day (or start freestyle), resume an in-progress session
 - **Exercise picker** — filtered by target muscle group + equipment, with search and expandable instructions
 - **Session logging** — add exercises, log sets (weight × reps), see last time's numbers with a one-tap "Repeat"
-- **History** — consistency stats (total / last 7 days / last 30 days) and a list of past sessions
+- **History** — consistency stats (total / last 7 days / last 30 days) and a list of past sessions, with sub-tabs for Volume and Body weight
 - **Per-exercise history** — best weight logged and every past set for a given exercise, across sessions
+- **Progressive-overload suggestions** — a "Try it" nudge (~5% more weight at the same reps, or +1 rep for bodyweight moves) based on your last logged set for that exercise
+- **Weekly volume by muscle group** — total weight × reps per primary muscle, over the last 7 or 30 days
+- **Bodyweight tracking** — log weigh-ins over time with a simple trend chart
 
 ## Development
 
@@ -65,8 +68,3 @@ the shell, exercise database, and everything you've logged so far should all
 still be there, since nothing in this app makes network calls after the
 initial load.
 
-## Not yet built (v2 ideas from the spec)
-
-- Progressive-overload suggestions
-- Weekly volume-per-muscle-group totals
-- Bodyweight tracking

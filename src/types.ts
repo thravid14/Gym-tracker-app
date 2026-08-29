@@ -40,6 +40,12 @@ export interface LoggedExercise {
   sets: SetEntry[]
 }
 
+export interface BodyWeightEntry {
+  id: string
+  date: string // ISO date-time
+  weightKg: number
+}
+
 export interface WorkoutSession {
   id: string
   date: string // ISO date-time, when the session was started

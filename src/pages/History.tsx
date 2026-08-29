@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppState } from '../state/AppState'
+import { HistoryTabs } from '../components/HistoryTabs'
 import { Card, EmptyState, PageHeader } from '../components/ui'
 
 function daysAgo(iso: string): number {
@@ -28,6 +29,7 @@ export function History() {
   return (
     <div className="flex-1 p-4">
       <PageHeader title="History" subtitle="Your consistency log." />
+      <HistoryTabs />
 
       <div className="mb-4 grid grid-cols-3 gap-2 text-center">
         {[

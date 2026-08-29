@@ -1,6 +1,13 @@
 import { createContext, useContext, useMemo, type ReactNode } from 'react'
 import { newId, usePersistedState } from '../lib/storage'
-import type { LoggedExercise, SetEntry, Split, SplitDay, WorkoutSession } from '../types'
+import type {
+  BodyWeightEntry,
+  LoggedExercise,
+  SetEntry,
+  Split,
+  SplitDay,
+  WorkoutSession,
+} from '../types'
 
 interface AppStateValue {
   split: Split | null
@@ -8,6 +15,10 @@ interface AppStateValue {
 
   sessions: WorkoutSession[]
   activeSession: WorkoutSession | null
+
+  bodyWeightEntries: BodyWeightEntry[]
+  addBodyWeightEntry: (date: string, weightKg: number) => void
+  removeBodyWeightEntry: (id: string) => void
 
   startSession: (day: SplitDay | null) => WorkoutSession
   addExerciseToSession: (sessionId: string, exerciseId: string, exerciseName: string) => void
@@ -39,6 +50,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     'activeSessionId',
     null,
   )
+  const [bodyWeightEntries, setBodyWeightEntries] = usePersistedState<BodyWeightEntry[]>(
+    'bodyWeight',
+    [],
+  )
 
   const activeSession = useMemo(
     () => sessions.find((s) => s.id === activeSessionId) ?? null,
@@ -52,6 +67,16 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
       sessions,
       activeSession,
+
+      bodyWeightEntries,
+      addBodyWeightEntry: (date, weightKg) => {
+        setBodyWeightEntries((prev) =>
+          [...prev, { id: newId(), date, weightKg }].sort((a, b) => a.date.localeCompare(b.date)),
+        )
+      },
+      removeBodyWeightEntry: (id) => {
+        setBodyWeightEntries((prev) => prev.filter((e) => e.id !== id))
+      },
 
       startSession: (day: SplitDay | null) => {
         const session: WorkoutSession = {
@@ -175,7 +200,16 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
           .sort((a, b) => b.session.date.localeCompare(a.session.date))
       },
     }),
-    [split, sessions, activeSession, setSplit, setSessions, setActiveSessionId],
+    [
+      split,
+      sessions,
+      activeSession,
+      bodyWeightEntries,
+      setSplit,
+      setSessions,
+      setActiveSessionId,
+      setBodyWeightEntries,
+    ],
   )
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>

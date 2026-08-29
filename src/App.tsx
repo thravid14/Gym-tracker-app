@@ -7,6 +7,8 @@ import { Session } from './pages/Session'
 import { ExercisePicker } from './pages/ExercisePicker'
 import { History } from './pages/History'
 import { ExerciseHistory } from './pages/ExerciseHistory'
+import { Volume } from './pages/Volume'
+import { BodyWeight } from './pages/BodyWeight'
 
 export default function App() {
   return (
@@ -18,6 +20,8 @@ export default function App() {
           <Route path="/session/:sessionId" element={<Session />} />
           <Route path="/session/:sessionId/add" element={<ExercisePicker />} />
           <Route path="/history" element={<History />} />
+          <Route path="/history/volume" element={<Volume />} />
+          <Route path="/history/bodyweight" element={<BodyWeight />} />
           <Route path="/history/exercise/:exerciseId" element={<ExerciseHistory />} />
         </Routes>
         <NavBar />
