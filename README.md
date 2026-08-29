@@ -43,6 +43,28 @@ npm run preview
 worker and manifest) that can be deployed to any static host — e.g. GitHub
 Pages, Netlify, Cloudflare Pages — at zero cost.
 
+### PWA icons
+
+`public/favicon.svg` is the source icon. The PNG variants
+(`pwa-192.png`, `pwa-512.png`, `maskable-512.png`, `apple-touch-icon.png`)
+are generated from it with `sharp` (a devDependency) — regenerate them after
+changing the source SVG with the script that was used to create them
+(resize to 192/512/180, plus a 512px maskable version with ~10% safe-area
+padding on a solid background).
+
+### Installing / offline testing
+
+Chrome/Edge (desktop or Android) should offer an install prompt automatically
+on a production build (`npm run build && npm run preview`) served over
+`http://localhost` or HTTPS — service workers won't register over plain HTTP
+on a non-localhost origin. On iOS, use Safari's Share → "Add to Home Screen"
+(the `apple-touch-icon` and `apple-mobile-web-app-*` meta tags in `index.html`
+cover that path, since iOS doesn't use the web manifest for its icon). To
+confirm offline support: install it, then turn off networking and relaunch —
+the shell, exercise database, and everything you've logged so far should all
+still be there, since nothing in this app makes network calls after the
+initial load.
+
 ## Not yet built (v2 ideas from the spec)
 
 - Progressive-overload suggestions
