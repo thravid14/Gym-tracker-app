@@ -28,6 +28,24 @@ client-side and is installable as an offline PWA.
 - **Weekly volume by muscle group** — total weight × reps per primary muscle, over the last 7 or 30 days
 - **Bodyweight tracking** — log weigh-ins over time with a simple trend chart
 
+## Deploying (GitHub Pages)
+
+A workflow (`.github/workflows/deploy.yml`) builds and deploys to GitHub
+Pages automatically on every push to `master`. One-time setup after this
+repo is published to GitHub:
+
+1. Repo **Settings → Pages → Source** → select **GitHub Actions**
+2. Push to `master` (or run the workflow manually from the Actions tab) — it
+   builds with `GITHUB_PAGES=true` (see `vite.config.ts`), which switches the
+   base path to `/gym-tracker-app/` to match a GitHub Pages project site's
+   URL. Local `npm run dev` / `npm run build` are unaffected and still run
+   at root.
+3. The site appears at `https://<your-username>.github.io/gym-tracker-app/`
+   — check the Actions tab for the exact URL and deploy status.
+
+If the repo is ever renamed, update the hardcoded `/gym-tracker-app/` path in
+`vite.config.ts` to match.
+
 ## Development
 
 ```bash
