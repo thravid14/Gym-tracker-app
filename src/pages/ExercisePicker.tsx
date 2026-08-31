@@ -48,7 +48,7 @@ export function ExercisePicker() {
 
   return (
     <div className="flex-1 p-4 pb-2">
-      <PageHeader title="Add exercise" subtitle={`For: ${session.splitDayLabel}`} />
+      <PageHeader showBack title="Add exercise" subtitle={`For: ${session.splitDayLabel}`} />
 
       <input
         value={search}

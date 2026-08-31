@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export function Card({ children, className = '', style, ...rest }: HTMLAttributes<HTMLDivElement>) {
   return (
@@ -35,9 +36,30 @@ export function Button({ variant = 'secondary', className = '', children, ...res
   )
 }
 
-export function PageHeader({ title, subtitle }: { title: string; subtitle?: ReactNode }) {
+export function PageHeader({
+  title,
+  subtitle,
+  showBack,
+}: {
+  title: string
+  subtitle?: ReactNode
+  /** Renders an in-app "← Back" link above the title, using browser history —
+   * for drill-down pages reached from more than one place, so users have an
+   * explicit way back that doesn't depend on the OS back gesture. */
+  showBack?: boolean
+}) {
+  const navigate = useNavigate()
   return (
     <header className="mb-4">
+      {showBack && (
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-2 text-sm font-medium"
+          style={{ color: 'var(--accent)' }}
+        >
+          ← Back
+        </button>
+      )}
       <h1 className="text-xl font-bold" style={{ color: 'var(--text)' }}>
         {title}
       </h1>

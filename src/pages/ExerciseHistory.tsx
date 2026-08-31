@@ -28,6 +28,7 @@ export function ExerciseHistory() {
   return (
     <div className="flex-1 p-4">
       <PageHeader
+        showBack
         title={exercise.name}
         subtitle={`${exercise.primaryMuscles.map(formatMuscle).join(', ')}${
           exercise.equipment ? ` · ${exercise.equipment}` : ''

@@ -16,7 +16,11 @@ export function getExerciseById(id: string): Exercise | undefined {
 }
 
 export interface ExerciseFilter {
-  muscles?: string[] // matches if primary OR secondary muscle is in this list
+  // Matches on primary muscle only — the exercise cards in the picker only
+  // display primaryMuscles, so filtering on secondary muscles too produced
+  // results (e.g. "Barbell Shoulder Press") that looked like they didn't
+  // match the selected muscle group at all.
+  muscles?: string[]
   equipment?: string[]
   search?: string
 }
@@ -24,8 +28,7 @@ export interface ExerciseFilter {
 export function filterExercises({ muscles, equipment, search }: ExerciseFilter): Exercise[] {
   return exercises.filter((e) => {
     if (muscles && muscles.length > 0) {
-      const hit = e.primaryMuscles.some((m) => muscles.includes(m)) ||
-        e.secondaryMuscles.some((m) => muscles.includes(m))
+      const hit = e.primaryMuscles.some((m) => muscles.includes(m))
       if (!hit) return false
     }
     if (equipment && equipment.length > 0) {

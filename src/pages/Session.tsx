@@ -180,6 +180,7 @@ export function Session() {
   return (
     <div className="flex-1 p-4">
       <PageHeader
+        showBack
         title={session.splitDayLabel}
         subtitle={`${new Date(session.date).toLocaleDateString(undefined, {
           weekday: 'short',
