@@ -17,6 +17,7 @@ export function HistoryTabs() {
           key={tab.to}
           to={tab.to}
           end
+          replace
           className="flex-1 rounded-md py-1.5 text-center text-xs font-semibold"
           style={({ isActive }) => ({
             background: isActive ? 'var(--surface)' : 'transparent',

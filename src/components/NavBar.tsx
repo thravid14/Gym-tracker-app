@@ -22,6 +22,10 @@ export function NavBar() {
           key={tab.to}
           to={tab.to}
           end={tab.to === '/'}
+          // Tab switches shouldn't pile onto the back stack the way a genuine
+          // drill-down does — replace so pressing back from a tab doesn't
+          // walk through every other tab you've visited first.
+          replace
           className={({ isActive }) =>
             `flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium ${
               isActive ? '' : ''
