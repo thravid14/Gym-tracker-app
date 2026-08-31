@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAppState } from '../state/AppState'
-import { allEquipment, allMuscles, filterExercises, formatMuscle } from '../lib/exercises'
+import { allEquipment, allMuscles, exerciseImageUrls, filterExercises, formatMuscle } from '../lib/exercises'
 import { Button, Card, EmptyState, PageHeader } from '../components/ui'
 
 const PAGE_SIZE = 25
@@ -119,15 +119,33 @@ export function ExercisePicker() {
         {results.slice(0, visible).map((ex) => {
           const added = addedIds.has(ex.id)
           const expanded = expandedId === ex.id
+          const images = exerciseImageUrls(ex)
           return (
             <Card key={ex.id} className="p-3">
               <div className="flex items-start justify-between gap-2">
-                <button className="flex-1 text-left" onClick={() => setExpandedId(expanded ? null : ex.id)}>
-                  <p className="font-medium">{ex.name}</p>
-                  <p className="text-xs capitalize" style={{ color: 'var(--text-muted)' }}>
-                    {ex.primaryMuscles.map(formatMuscle).join(', ')}
-                    {ex.equipment ? ` · ${ex.equipment}` : ''}
-                  </p>
+                <button
+                  className="flex flex-1 items-center gap-3 text-left"
+                  onClick={() => setExpandedId(expanded ? null : ex.id)}
+                >
+                  {images[0] && (
+                    <img
+                      src={images[0]}
+                      alt=""
+                      loading="lazy"
+                      className="h-14 w-14 shrink-0 rounded-lg object-cover"
+                      style={{ background: 'var(--surface-2)' }}
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                      }}
+                    />
+                  )}
+                  <div>
+                    <p className="font-medium">{ex.name}</p>
+                    <p className="text-xs capitalize" style={{ color: 'var(--text-muted)' }}>
+                      {ex.primaryMuscles.map(formatMuscle).join(', ')}
+                      {ex.equipment ? ` · ${ex.equipment}` : ''}
+                    </p>
+                  </div>
                 </button>
                 <Button
                   variant={added ? 'secondary' : 'primary'}
@@ -137,12 +155,33 @@ export function ExercisePicker() {
                   {added ? '+ Add again' : '+ Add'}
                 </Button>
               </div>
-              {expanded && ex.instructions.length > 0 && (
-                <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs" style={{ color: 'var(--text-muted)' }}>
-                  {ex.instructions.map((step, i) => (
-                    <li key={i}>{step}</li>
-                  ))}
-                </ol>
+              {expanded && (
+                <>
+                  {images.length > 0 && (
+                    <div className="mt-2 flex gap-2">
+                      {images.map((src) => (
+                        <img
+                          key={src}
+                          src={src}
+                          alt=""
+                          loading="lazy"
+                          className="h-32 flex-1 rounded-lg object-cover"
+                          style={{ background: 'var(--surface-2)' }}
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none'
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                  {ex.instructions.length > 0 && (
+                    <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs" style={{ color: 'var(--text-muted)' }}>
+                      {ex.instructions.map((step, i) => (
+                        <li key={i}>{step}</li>
+                      ))}
+                    </ol>
+                  )}
+                </>
               )}
             </Card>
           )

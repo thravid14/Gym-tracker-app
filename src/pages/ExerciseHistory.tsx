@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAppState } from '../state/AppState'
-import { getExerciseById, formatMuscle } from '../lib/exercises'
+import { getExerciseById, exerciseImageUrls, formatMuscle } from '../lib/exercises'
 import { Card, EmptyState, PageHeader } from '../components/ui'
 
 export function ExerciseHistory() {
@@ -25,6 +25,8 @@ export function ExerciseHistory() {
     .flatMap((h) => h.logged.sets)
     .reduce((max, s) => (s.weight > max ? s.weight : max), 0)
 
+  const images = exerciseImageUrls(exercise)
+
   return (
     <div className="flex-1 p-4">
       <PageHeader
@@ -34,6 +36,24 @@ export function ExerciseHistory() {
           exercise.equipment ? ` · ${exercise.equipment}` : ''
         }`}
       />
+
+      {images.length > 0 && (
+        <div className="mb-4 flex gap-2">
+          {images.map((src) => (
+            <img
+              key={src}
+              src={src}
+              alt=""
+              loading="lazy"
+              className="h-40 flex-1 rounded-lg object-cover"
+              style={{ background: 'var(--surface-2)' }}
+              onError={(e) => {
+                e.currentTarget.style.display = 'none'
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       {best > 0 && (
         <Card className="mb-4">

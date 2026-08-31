@@ -44,3 +44,15 @@ export function filterExercises({ muscles, equipment, search }: ExerciseFilter):
 export function formatMuscle(m: string): string {
   return m.replace(/\b\w/g, (c) => c.toUpperCase())
 }
+
+// The exercise dataset's `images` field holds paths relative to
+// free-exercise-db's own exercises/ folder (e.g. "3_4_Sit-Up/0.jpg") — the
+// actual image files aren't bundled into this app, they're served live via
+// jsDelivr's free CDN mirror of that public GitHub repo. Requires internet
+// to view; the rest of the app works fully offline regardless.
+const IMAGE_CDN_BASE = 'https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises/'
+
+/** Image URLs for an exercise, in order (first is usually the start position, second the end/contracted position). Empty for the handful of exercises with no source images. */
+export function exerciseImageUrls(exercise: Exercise): string[] {
+  return exercise.images.map((path) => IMAGE_CDN_BASE + path)
+}
