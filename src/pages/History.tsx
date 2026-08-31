@@ -3,9 +3,22 @@ import { useNavigate } from 'react-router-dom'
 import { useAppState } from '../state/AppState'
 import { HistoryTabs } from '../components/HistoryTabs'
 import { Card, EmptyState, PageHeader } from '../components/ui'
+import { useCountUp } from '../hooks/useCountUp'
 
 function daysAgo(iso: string): number {
   return (Date.now() - new Date(iso).getTime()) / 86_400_000
+}
+
+function StatCard({ label, value }: { label: string; value: number }) {
+  const animated = useCountUp(value)
+  return (
+    <Card className="p-3">
+      <p className="text-xl font-bold">{Math.round(animated)}</p>
+      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+        {label}
+      </p>
+    </Card>
+  )
 }
 
 export function History() {
@@ -32,18 +45,9 @@ export function History() {
       <HistoryTabs />
 
       <div className="mb-4 grid grid-cols-3 gap-2 text-center">
-        {[
-          { label: 'Total', value: stats.total },
-          { label: 'Last 7 days', value: stats.last7 },
-          { label: 'Last 30 days', value: stats.last30 },
-        ].map((s) => (
-          <Card key={s.label} className="p-3">
-            <p className="text-xl font-bold">{s.value}</p>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              {s.label}
-            </p>
-          </Card>
-        ))}
+        <StatCard label="Total" value={stats.total} />
+        <StatCard label="Last 7 days" value={stats.last7} />
+        <StatCard label="Last 30 days" value={stats.last30} />
       </div>
 
       {completed.length === 0 ? (

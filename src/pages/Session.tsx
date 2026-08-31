@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAppState } from '../state/AppState'
 import { suggestNextSet } from '../lib/suggestions'
 import { Button, Card, EmptyState, PageHeader } from '../components/ui'
+import { Celebration } from '../components/Celebration'
 import type { LoggedExercise } from '../types'
 
 function SetRow({
@@ -162,6 +163,7 @@ export function Session() {
   const { sessionId } = useParams<{ sessionId: string }>()
   const { sessions, finishSession, deleteSession } = useAppState()
   const navigate = useNavigate()
+  const [celebrateFire, setCelebrateFire] = useState(0)
 
   const session = sessions.find((s) => s.id === sessionId)
 
@@ -179,6 +181,7 @@ export function Session() {
 
   return (
     <div className="flex-1 p-4">
+      <Celebration fire={celebrateFire} />
       <PageHeader
         showBack
         title={session.splitDayLabel}
@@ -212,7 +215,10 @@ export function Session() {
             className="flex-1"
             onClick={() => {
               finishSession(session.id)
-              navigate('/history')
+              setCelebrateFire((f) => f + 1)
+              // Brief pause so the celebration is actually visible before
+              // navigating away, rather than firing and immediately unmounting.
+              setTimeout(() => navigate('/history'), 700)
             }}
           >
             Finish session

@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 
 const tabs = [
   { to: '/', label: 'Today', icon: '🏠' },
@@ -11,12 +11,32 @@ const tabs = [
 // domain (Vercel), so it's hidden on the GitHub Pages build.
 const showMealAppLink = import.meta.env.BASE_URL === '/gym/'
 
+const totalSlots = tabs.length + (showMealAppLink ? 1 : 0)
+
 export function NavBar() {
+  const { pathname } = useLocation()
+  // History's own sub-tabs (Sessions/Volume/Body weight) all count as the
+  // History tab being active here.
+  const activeIndex = tabs.findIndex((tab) =>
+    tab.to === '/' ? pathname === '/' : pathname.startsWith(tab.to),
+  )
+
   return (
     <nav
-      className={`sticky bottom-0 z-10 grid border-t ${showMealAppLink ? 'grid-cols-4' : 'grid-cols-3'}`}
+      className={`sticky bottom-0 z-10 grid border-t relative ${showMealAppLink ? 'grid-cols-4' : 'grid-cols-3'}`}
       style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
     >
+      {activeIndex >= 0 && (
+        <div
+          className="absolute top-0 h-0.5 rounded-full"
+          style={{
+            background: 'var(--accent)',
+            left: `${(activeIndex / totalSlots) * 100}%`,
+            width: `${100 / totalSlots}%`,
+            transition: 'left 0.25s cubic-bezier(0.22, 1, 0.36, 1), width 0.25s cubic-bezier(0.22, 1, 0.36, 1)',
+          }}
+        />
+      )}
       {tabs.map((tab) => (
         <NavLink
           key={tab.to}
@@ -35,8 +55,21 @@ export function NavBar() {
             color: isActive ? 'var(--accent)' : 'var(--text-muted)',
           })}
         >
-          <span className="text-lg leading-none">{tab.icon}</span>
-          {tab.label}
+          {({ isActive }) => (
+            <>
+              <span
+                className="text-lg leading-none"
+                style={{
+                  display: 'inline-block',
+                  transition: 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  transform: isActive ? 'translateY(-2px) scale(1.1)' : undefined,
+                }}
+              >
+                {tab.icon}
+              </span>
+              {tab.label}
+            </>
+          )}
         </NavLink>
       ))}
       {showMealAppLink && (
