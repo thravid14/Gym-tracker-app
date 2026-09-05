@@ -99,6 +99,15 @@ body,
   height: 100%;
 }
 
+html, body {
+  /* Safety net against any element (an oversized image, an unbroken long
+     word, a flex child with a wider intrinsic size than its flex-basis)
+     forcing horizontal scroll on what should be a fixed-width mobile
+     layout. Fix the actual overflowing element first — this only catches
+     what slips through. */
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   background: var(--bg);

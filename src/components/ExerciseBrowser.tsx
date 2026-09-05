@@ -136,7 +136,7 @@ export function ExerciseBrowser({ exercises, initialMuscles, renderAction }: Exe
                       Custom
                     </span>
                   ) : null}
-                  <div>
+                  <div className="min-w-0 break-words">
                     <p className="font-medium">{ex.name}</p>
                     <p className="text-xs capitalize" style={{ color: 'var(--text-muted)' }}>
                       {ex.primaryMuscles.map(formatMuscle).join(', ')}
@@ -156,7 +156,7 @@ export function ExerciseBrowser({ exercises, initialMuscles, renderAction }: Exe
                           src={src}
                           alt=""
                           loading="lazy"
-                          className="h-32 flex-1 rounded-lg object-cover"
+                          className="h-32 min-w-0 flex-1 rounded-lg object-cover"
                           style={{ background: 'var(--surface-2)' }}
                           onError={(e) => {
                             e.currentTarget.style.display = 'none'

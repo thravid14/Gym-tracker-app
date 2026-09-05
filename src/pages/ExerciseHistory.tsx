@@ -46,7 +46,7 @@ export function ExerciseHistory() {
               src={src}
               alt=""
               loading="lazy"
-              className="h-40 flex-1 rounded-lg object-cover"
+              className="h-40 min-w-0 flex-1 rounded-lg object-cover"
               style={{ background: 'var(--surface-2)' }}
               onError={(e) => {
                 e.currentTarget.style.display = 'none'
