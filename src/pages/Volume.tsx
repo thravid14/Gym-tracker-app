@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useAppState } from '../state/AppState'
 import { computeVolumeByMuscle } from '../lib/volume'
+import { useExerciseLibrary } from '../lib/exercises'
 import { HistoryTabs } from '../components/HistoryTabs'
 import { VolumeBars } from '../components/VolumeBars'
 import { EmptyState, PageHeader } from '../components/ui'
@@ -12,9 +13,10 @@ const RANGES = [
 
 export function Volume() {
   const { sessions } = useAppState()
+  const { all } = useExerciseLibrary()
   const [days, setDays] = useState(7)
 
-  const totals = useMemo(() => computeVolumeByMuscle(sessions, days), [sessions, days])
+  const totals = useMemo(() => computeVolumeByMuscle(sessions, days, all), [sessions, days, all])
   const hasAny = Object.values(totals).some((v) => v > 0)
 
   return (

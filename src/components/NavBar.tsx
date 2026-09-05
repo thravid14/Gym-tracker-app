@@ -4,6 +4,7 @@ const tabs = [
   { to: '/', label: 'Today', icon: '🏠' },
   { to: '/history', label: 'History', icon: '📅' },
   { to: '/split', label: 'Split', icon: '🧩' },
+  { to: '/exercises', label: 'Exercises', icon: '📚' },
 ]
 
 // Meal-prep app link is a full page navigation (not a route inside this app's
@@ -23,8 +24,12 @@ export function NavBar() {
 
   return (
     <nav
-      className={`sticky bottom-0 z-10 grid border-t relative ${showMealAppLink ? 'grid-cols-4' : 'grid-cols-3'}`}
-      style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
+      className="sticky bottom-0 z-10 grid border-t relative"
+      style={{
+        background: 'var(--surface)',
+        borderColor: 'var(--border)',
+        gridTemplateColumns: `repeat(${totalSlots}, 1fr)`,
+      }}
     >
       {activeIndex >= 0 && (
         <div

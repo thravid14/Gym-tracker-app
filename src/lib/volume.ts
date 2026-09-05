@@ -1,5 +1,5 @@
 import { getExerciseById } from './exercises'
-import type { WorkoutSession } from '../types'
+import type { Exercise, WorkoutSession } from '../types'
 
 /**
  * Total volume (sum of weight x reps) per primary muscle, across completed
@@ -10,6 +10,7 @@ import type { WorkoutSession } from '../types'
 export function computeVolumeByMuscle(
   sessions: WorkoutSession[],
   days: number,
+  exerciseLibrary: Exercise[],
 ): Record<string, number> {
   const cutoff = Date.now() - days * 86_400_000
   const totals: Record<string, number> = {}
@@ -19,7 +20,7 @@ export function computeVolumeByMuscle(
     if (new Date(session.date).getTime() < cutoff) continue
 
     for (const logged of session.exercises) {
-      const exercise = getExerciseById(logged.exerciseId)
+      const exercise = getExerciseById(exerciseLibrary, logged.exerciseId)
       if (!exercise) continue
       const volume = logged.sets.reduce((sum, s) => sum + s.weight * s.reps, 0)
       if (volume === 0) continue

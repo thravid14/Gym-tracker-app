@@ -1,14 +1,15 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAppState } from '../state/AppState'
-import { getExerciseById, exerciseImageUrls, formatMuscle } from '../lib/exercises'
+import { getExerciseById, exerciseImageUrls, formatMuscle, useExerciseLibrary } from '../lib/exercises'
 import { Card, EmptyState, PageHeader } from '../components/ui'
 
 export function ExerciseHistory() {
   const { exerciseId } = useParams<{ exerciseId: string }>()
   const { getExerciseHistory } = useAppState()
+  const { all } = useExerciseLibrary()
   const navigate = useNavigate()
 
-  const exercise = exerciseId ? getExerciseById(exerciseId) : undefined
+  const exercise = exerciseId ? getExerciseById(all, exerciseId) : undefined
   const history = exerciseId ? getExerciseHistory(exerciseId) : []
 
   if (!exercise) {
