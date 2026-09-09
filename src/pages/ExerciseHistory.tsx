@@ -6,10 +6,12 @@ import { Card, EmptyState, PageHeader } from '../components/ui'
 export function ExerciseHistory() {
   const { exerciseId } = useParams<{ exerciseId: string }>()
   const { getExerciseHistory } = useAppState()
-  const { all } = useExerciseLibrary()
+  const { allIncludingHidden } = useExerciseLibrary()
   const navigate = useNavigate()
 
-  const exercise = exerciseId ? getExerciseById(all, exerciseId) : undefined
+  // Deliberately the unfiltered list — a hidden exercise's own history page
+  // should still resolve, hiding only affects search/browse results.
+  const exercise = exerciseId ? getExerciseById(allIncludingHidden, exerciseId) : undefined
   const history = exerciseId ? getExerciseHistory(exerciseId) : []
 
   if (!exercise) {

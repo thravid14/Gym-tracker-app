@@ -13,10 +13,15 @@ const RANGES = [
 
 export function Volume() {
   const { sessions } = useAppState()
-  const { all } = useExerciseLibrary()
+  // Unfiltered — hiding an exercise from search shouldn't erase its
+  // contribution to past volume-by-muscle stats.
+  const { allIncludingHidden } = useExerciseLibrary()
   const [days, setDays] = useState(7)
 
-  const totals = useMemo(() => computeVolumeByMuscle(sessions, days, all), [sessions, days, all])
+  const totals = useMemo(
+    () => computeVolumeByMuscle(sessions, days, allIncludingHidden),
+    [sessions, days, allIncludingHidden],
+  )
   const hasAny = Object.values(totals).some((v) => v > 0)
 
   return (

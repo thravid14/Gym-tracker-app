@@ -1,9 +1,14 @@
 import { useCallback, useMemo } from 'react'
-import raw from '../data/exercises.json'
+// Imported as raw text + parsed at runtime rather than a normal JSON module
+// import: with `resolveJsonModule`, TypeScript infers a full literal type
+// over the entire array (1090+ entries after the wger import), which made
+// `tsc -b` dramatically slower — several minutes instead of ~1s. A `?raw`
+// import is typed as a plain string, so none of that inference happens.
+import rawExercisesText from '../data/exercises.json?raw'
 import { newId, usePersistedState } from './storage'
 import type { Exercise } from '../types'
 
-export const exercises = raw as Exercise[]
+export const exercises = JSON.parse(rawExercisesText) as Exercise[]
 
 export const allMuscles: string[] = Array.from(
   new Set(exercises.flatMap((e) => e.primaryMuscles)),
@@ -55,9 +60,15 @@ export function formatMuscle(m: string): string {
 // to view; the rest of the app works fully offline regardless.
 const IMAGE_CDN_BASE = 'https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises/'
 
-/** Image URLs for an exercise, in order (first is usually the start position, second the end/contracted position). Empty for the handful of exercises with no source images. */
+/**
+ * Image URLs for an exercise, in order (first is usually the start position,
+ * second the end/contracted position). Empty for exercises with no source
+ * images. Handles two source shapes: free-exercise-db stores paths relative
+ * to its own repo (prefixed with the jsDelivr CDN base here); the wger.de
+ * import already stores full https:// URLs, used as-is.
+ */
 export function exerciseImageUrls(exercise: Exercise): string[] {
-  return exercise.images.map((path) => IMAGE_CDN_BASE + path)
+  return exercise.images.map((p) => (p.startsWith('http') ? p : IMAGE_CDN_BASE + p))
 }
 
 export type NewCustomExercise = Pick<
@@ -74,8 +85,16 @@ export type NewCustomExercise = Pick<
  */
 export function useExerciseLibrary() {
   const [custom, setCustom] = usePersistedState<Exercise[]>('customExercises', [])
+  // Hiding is soft — bundled exercises can't be deleted (they're a shared
+  // static file), but a hidden id is filtered out of `all` everywhere
+  // (search, picker, filters) and can be reversed from the hidden list.
+  const [hiddenIds, setHiddenIds] = usePersistedState<string[]>('hiddenExerciseIds', [])
 
-  const all = useMemo(() => [...exercises, ...custom], [custom])
+  const combined = useMemo(() => [...exercises, ...custom], [custom])
+  const hiddenSet = useMemo(() => new Set(hiddenIds), [hiddenIds])
+
+  const all = useMemo(() => combined.filter((e) => !hiddenSet.has(e.id)), [combined, hiddenSet])
+  const hiddenExercises = useMemo(() => combined.filter((e) => hiddenSet.has(e.id)), [combined, hiddenSet])
 
   const addCustomExercise = useCallback(
     (input: NewCustomExercise) => {
@@ -103,5 +122,28 @@ export function useExerciseLibrary() {
     [setCustom],
   )
 
-  return { all, custom, addCustomExercise, removeCustomExercise }
+  const hideExercise = useCallback(
+    (id: string) => setHiddenIds((prev) => (prev.includes(id) ? prev : [...prev, id])),
+    [setHiddenIds],
+  )
+
+  const unhideExercise = useCallback(
+    (id: string) => setHiddenIds((prev) => prev.filter((x) => x !== id)),
+    [setHiddenIds],
+  )
+
+  return {
+    all,
+    // Unfiltered (bundled + custom, hidden ones included) — use this for
+    // *lookups by id*, e.g. resolving a previously-logged session's
+    // exercise, so hiding something from search doesn't break its own
+    // history page. Use `all` for search/filter/picker results.
+    allIncludingHidden: combined,
+    custom,
+    hiddenExercises,
+    addCustomExercise,
+    removeCustomExercise,
+    hideExercise,
+    unhideExercise,
+  }
 }

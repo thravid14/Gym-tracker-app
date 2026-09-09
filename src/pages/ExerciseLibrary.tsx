@@ -150,7 +150,8 @@ function AddCustomExerciseForm({
 }
 
 export function ExerciseLibrary() {
-  const { all, removeCustomExercise, addCustomExercise } = useExerciseLibrary()
+  const { all, hiddenExercises, removeCustomExercise, addCustomExercise, hideExercise, unhideExercise } =
+    useExerciseLibrary()
   const [showForm, setShowForm] = useState(false)
   const navigate = useNavigate()
 
@@ -166,6 +167,24 @@ export function ExerciseLibrary() {
         </Button>
       )}
 
+      {hiddenExercises.length > 0 && (
+        <details className="mb-4">
+          <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
+            Hidden exercises ({hiddenExercises.length})
+          </summary>
+          <div className="mt-2 flex flex-col gap-2">
+            {hiddenExercises.map((ex) => (
+              <Card key={ex.id} className="flex items-center justify-between gap-2 p-2.5">
+                <span className="text-sm">{ex.name}</span>
+                <Button className="shrink-0 text-xs" onClick={() => unhideExercise(ex.id)}>
+                  Unhide
+                </Button>
+              </Card>
+            ))}
+          </div>
+        </details>
+      )}
+
       <ExerciseBrowser
         exercises={all}
         renderAction={(ex) => (
@@ -173,13 +192,21 @@ export function ExerciseLibrary() {
             <Button className="text-xs" onClick={() => navigate(`/history/exercise/${ex.id}`)}>
               History
             </Button>
-            {ex.id.startsWith('custom-') && (
+            {ex.id.startsWith('custom-') ? (
               <button
                 className="text-xs"
                 style={{ color: 'var(--danger)' }}
                 onClick={() => removeCustomExercise(ex.id)}
               >
                 Remove
+              </button>
+            ) : (
+              <button
+                className="text-xs"
+                style={{ color: 'var(--text-muted)' }}
+                onClick={() => hideExercise(ex.id)}
+              >
+                Hide
               </button>
             )}
           </div>
