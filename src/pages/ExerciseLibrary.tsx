@@ -150,8 +150,16 @@ function AddCustomExerciseForm({
 }
 
 export function ExerciseLibrary() {
-  const { all, hiddenExercises, removeCustomExercise, addCustomExercise, hideExercise, unhideExercise } =
-    useExerciseLibrary()
+  const {
+    all,
+    hiddenExercises,
+    favoriteIds,
+    removeCustomExercise,
+    addCustomExercise,
+    hideExercise,
+    unhideExercise,
+    toggleFavorite,
+  } = useExerciseLibrary()
   const [showForm, setShowForm] = useState(false)
   const navigate = useNavigate()
 
@@ -187,6 +195,8 @@ export function ExerciseLibrary() {
 
       <ExerciseBrowser
         exercises={all}
+        favoriteIds={favoriteIds}
+        onToggleFavorite={toggleFavorite}
         renderAction={(ex) => (
           <div className="flex shrink-0 flex-col items-end gap-1">
             <Button className="text-xs" onClick={() => navigate(`/history/exercise/${ex.id}`)}>

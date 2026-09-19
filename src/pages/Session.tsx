@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAppState } from '../state/AppState'
 import { suggestNextSet } from '../lib/suggestions'
@@ -61,6 +61,8 @@ function ExerciseBlock({ sessionId, logged }: { sessionId: string; logged: Logge
   const navigate = useNavigate()
   const [reps, setReps] = useState('')
   const [weight, setWeight] = useState('')
+  const weightInputRef = useRef<HTMLInputElement>(null)
+  const repsInputRef = useRef<HTMLInputElement>(null)
 
   const history = getExerciseHistory(logged.exerciseId, sessionId)
   const last = history[0]
@@ -73,6 +75,9 @@ function ExerciseBlock({ sessionId, logged }: { sessionId: string; logged: Logge
     addSet(sessionId, logged.id, { reps: r, weight: w || 0 })
     setReps('')
     setWeight('')
+    // Back to weight, ready for the next set — logging several sets in a
+    // row shouldn't need re-tapping into the field each time.
+    weightInputRef.current?.focus()
   }
 
   function repeatLast() {
@@ -133,21 +138,37 @@ function ExerciseBlock({ sessionId, logged }: { sessionId: string; logged: Logge
 
       <div className="mt-2 flex items-center gap-2 text-sm">
         <input
+          ref={weightInputRef}
           type="number"
           inputMode="decimal"
+          enterKeyHint="next"
           placeholder="kg"
           value={weight}
           onChange={(e) => setWeight(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              repsInputRef.current?.focus()
+            }
+          }}
           className="w-20 rounded-md border px-2 py-1"
           style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
         />
         <span style={{ color: 'var(--text-muted)' }}>×</span>
         <input
+          ref={repsInputRef}
           type="number"
           inputMode="numeric"
+          enterKeyHint="done"
           placeholder="reps"
           value={reps}
           onChange={(e) => setReps(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              handleAddSet()
+            }
+          }}
           className="w-16 rounded-md border px-2 py-1"
           style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
         />

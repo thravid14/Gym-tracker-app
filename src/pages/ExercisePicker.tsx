@@ -7,7 +7,7 @@ import { Button, EmptyState, PageHeader } from '../components/ui'
 export function ExercisePicker() {
   const { sessionId } = useParams<{ sessionId: string }>()
   const { sessions, addExerciseToSession } = useAppState()
-  const { all } = useExerciseLibrary()
+  const { all, favoriteIds, toggleFavorite } = useExerciseLibrary()
   const navigate = useNavigate()
 
   const session = sessions.find((s) => s.id === sessionId)
@@ -31,6 +31,8 @@ export function ExercisePicker() {
       <ExerciseBrowser
         exercises={all}
         initialMuscles={session.targetMuscles}
+        favoriteIds={favoriteIds}
+        onToggleFavorite={toggleFavorite}
         renderAction={(ex) => {
           const added = addedIds.has(ex.id)
           return (

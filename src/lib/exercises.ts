@@ -89,12 +89,26 @@ export function useExerciseLibrary() {
   // static file), but a hidden id is filtered out of `all` everywhere
   // (search, picker, filters) and can be reversed from the hidden list.
   const [hiddenIds, setHiddenIds] = usePersistedState<string[]>('hiddenExerciseIds', [])
+  const [favoriteIds, setFavoriteIds] = usePersistedState<string[]>('favoriteExerciseIds', [])
 
   const combined = useMemo(() => [...exercises, ...custom], [custom])
   const hiddenSet = useMemo(() => new Set(hiddenIds), [hiddenIds])
+  const favoriteSet = useMemo(() => new Set(favoriteIds), [favoriteIds])
 
-  const all = useMemo(() => combined.filter((e) => !hiddenSet.has(e.id)), [combined, hiddenSet])
+  const all = useMemo(() => {
+    const visible = combined.filter((e) => !hiddenSet.has(e.id))
+    // Favorites bubble to the top (stable otherwise) so your go-to exercises
+    // are the first thing you see, in both the library and the in-session
+    // picker, without needing to search for them.
+    return [...visible].sort((a, b) => Number(favoriteSet.has(b.id)) - Number(favoriteSet.has(a.id)))
+  }, [combined, hiddenSet, favoriteSet])
   const hiddenExercises = useMemo(() => combined.filter((e) => hiddenSet.has(e.id)), [combined, hiddenSet])
+
+  const toggleFavorite = useCallback(
+    (id: string) =>
+      setFavoriteIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])),
+    [setFavoriteIds],
+  )
 
   const addCustomExercise = useCallback(
     (input: NewCustomExercise) => {
@@ -141,9 +155,11 @@ export function useExerciseLibrary() {
     allIncludingHidden: combined,
     custom,
     hiddenExercises,
+    favoriteIds: favoriteSet,
     addCustomExercise,
     removeCustomExercise,
     hideExercise,
     unhideExercise,
+    toggleFavorite,
   }
 }

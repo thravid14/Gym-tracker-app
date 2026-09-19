@@ -10,6 +10,8 @@ interface ExerciseBrowserProps {
   initialMuscles?: string[]
   /** Trailing action button for each result card (e.g. "+ Add" in a picker, "Remove" for a custom exercise). */
   renderAction: (exercise: Exercise) => ReactNode
+  favoriteIds: Set<string>
+  onToggleFavorite: (id: string) => void
 }
 
 /**
@@ -17,7 +19,13 @@ interface ExerciseBrowserProps {
  * picker and the standalone exercise library — same filtering logic, only
  * the per-result action button differs.
  */
-export function ExerciseBrowser({ exercises, initialMuscles, renderAction }: ExerciseBrowserProps) {
+export function ExerciseBrowser({
+  exercises,
+  initialMuscles,
+  renderAction,
+  favoriteIds,
+  onToggleFavorite,
+}: ExerciseBrowserProps) {
   const [muscles, setMuscles] = useState<string[]>(initialMuscles ?? [])
   const [equipment, setEquipment] = useState<string[]>([])
   const [search, setSearch] = useState('')
@@ -143,6 +151,14 @@ export function ExerciseBrowser({ exercises, initialMuscles, renderAction }: Exe
                       {ex.equipment ? ` · ${ex.equipment}` : ''}
                     </p>
                   </div>
+                </button>
+                <button
+                  className="shrink-0 text-xl leading-none"
+                  style={{ color: favoriteIds.has(ex.id) ? '#eab308' : 'var(--text-muted)' }}
+                  onClick={() => onToggleFavorite(ex.id)}
+                  aria-label={favoriteIds.has(ex.id) ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                  {favoriteIds.has(ex.id) ? '★' : '☆'}
                 </button>
                 {renderAction(ex)}
               </div>
