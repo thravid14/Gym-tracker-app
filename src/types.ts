@@ -31,6 +31,12 @@ export interface SetEntry {
   weight: number
   rpe?: number
   notes?: string
+  /**
+   * Pre-filled from a previous session ("start from last time") but not yet
+   * confirmed — planned sets don't count as logged work until ticked off, and
+   * are dropped (or kept, by choice) when the session is finished.
+   */
+  planned?: boolean
 }
 
 export interface LoggedExercise {
@@ -44,6 +50,15 @@ export interface BodyWeightEntry {
   id: string
   date: string // ISO date-time
   weightKg: number
+}
+
+/** A day you meant to train but didn't (or a deliberate rest day). */
+export interface SkippedDay {
+  id: string
+  date: string // local calendar date, YYYY-MM-DD
+  splitDayId: string | null
+  splitDayLabel: string | null
+  reason: string
 }
 
 export interface WorkoutSession {

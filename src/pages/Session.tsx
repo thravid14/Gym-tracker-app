@@ -15,14 +15,26 @@ function SetRow({
   sessionId: string
   exerciseId: string
   index: number
-  set: { id: string; reps: number; weight: number }
+  set: { id: string; reps: number; weight: number; planned?: boolean }
 }) {
-  const { updateSet, removeSet } = useAppState()
+  const { updateSet, removeSet, confirmSet } = useAppState()
+  const planned = !!set.planned
   return (
-    <div className="flex items-center gap-2 text-sm">
-      <span className="w-5 shrink-0 text-center" style={{ color: 'var(--text-muted)' }}>
-        {index + 1}
-      </span>
+    <div className="flex items-center gap-2 text-sm" style={{ opacity: planned ? 0.65 : 1 }}>
+      {/* Tick circle: shows the set number while still planned, a check once logged. */}
+      <button
+        aria-label={planned ? `Mark set ${index + 1} as done` : `Mark set ${index + 1} as not done`}
+        aria-pressed={!planned}
+        onClick={() => confirmSet(sessionId, exerciseId, set.id, planned)}
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold"
+        style={{
+          borderColor: planned ? 'var(--border)' : 'var(--accent)',
+          background: planned ? 'transparent' : 'var(--accent)',
+          color: planned ? 'var(--text-muted)' : 'var(--accent-text)',
+        }}
+      >
+        {planned ? index + 1 : '✓'}
+      </button>
       <input
         type="number"
         inputMode="decimal"
@@ -46,19 +58,21 @@ function SetRow({
       />
       <span style={{ color: 'var(--text-muted)' }}>reps</span>
       <button
-        className="ml-auto text-xs"
+        aria-label={`Remove set ${index + 1}`}
+        className="ml-auto px-1 text-xs"
         style={{ color: 'var(--danger)' }}
         onClick={() => removeSet(sessionId, exerciseId, set.id)}
       >
-        Remove
+        ✕
       </button>
     </div>
   )
 }
 
 function ExerciseBlock({ sessionId, logged }: { sessionId: string; logged: LoggedExercise }) {
-  const { addSet, removeExerciseFromSession, getExerciseHistory } = useAppState()
+  const { addSet, removeExerciseFromSession, getExerciseHistory, confirmAllSets } = useAppState()
   const navigate = useNavigate()
+  const hasPlanned = logged.sets.some((s) => s.planned)
   const [reps, setReps] = useState('')
   const [weight, setWeight] = useState('')
   const weightInputRef = useRef<HTMLInputElement>(null)
@@ -113,10 +127,15 @@ function ExerciseBlock({ sessionId, logged }: { sessionId: string; logged: Logge
       {last && (
         <p className="mb-1 text-xs" style={{ color: 'var(--text-muted)' }}>
           Last time: {last.logged.sets.map((s) => `${s.weight}×${s.reps}`).join(', ')}
-          {' · '}
-          <button className="underline" onClick={repeatLast}>
-            Repeat
-          </button>
+          {/* Planned sets already are last time's numbers — Repeat would double them. */}
+          {!hasPlanned && (
+            <>
+              {' · '}
+              <button className="underline" onClick={repeatLast}>
+                Repeat
+              </button>
+            </>
+          )}
         </p>
       )}
 
@@ -135,6 +154,16 @@ function ExerciseBlock({ sessionId, logged }: { sessionId: string; logged: Logge
           <SetRow key={s.id} sessionId={sessionId} exerciseId={logged.id} index={i} set={s} />
         ))}
       </div>
+
+      {hasPlanned && (
+        <button
+          className="mt-2 text-xs font-semibold underline"
+          style={{ color: 'var(--accent)' }}
+          onClick={() => confirmAllSets(sessionId, logged.id)}
+        >
+          ✓ Tick all sets as done
+        </button>
+      )}
 
       <div className="mt-2 flex items-center gap-2 text-sm">
         <input
@@ -185,6 +214,7 @@ export function Session() {
   const { sessions, finishSession, deleteSession } = useAppState()
   const navigate = useNavigate()
   const [celebrateFire, setCelebrateFire] = useState(0)
+  const [askAboutPlanned, setAskAboutPlanned] = useState(false)
 
   const session = sessions.find((s) => s.id === sessionId)
 
@@ -198,7 +228,17 @@ export function Session() {
     )
   }
 
-  const totalSets = session.exercises.reduce((n, e) => n + e.sets.length, 0)
+  const allSets = session.exercises.flatMap((e) => e.sets)
+  const plannedCount = allSets.filter((s) => s.planned).length
+  const doneCount = allSets.length - plannedCount
+
+  function complete(plannedSets: 'keep' | 'discard') {
+    finishSession(session!.id, plannedSets)
+    setCelebrateFire((f) => f + 1)
+    // Brief pause so the celebration is actually visible before
+    // navigating away, rather than firing and immediately unmounting.
+    setTimeout(() => navigate('/history'), 700)
+  }
 
   return (
     <div className="flex-1 p-4">
@@ -210,9 +250,9 @@ export function Session() {
           weekday: 'short',
           month: 'short',
           day: 'numeric',
-        })} · ${session.exercises.length} exercises · ${totalSets} sets${
-          session.completedAt ? ' · Completed' : ''
-        }`}
+        })} · ${session.exercises.length} exercise${session.exercises.length === 1 ? '' : 's'} · ${doneCount} set${doneCount === 1 ? '' : 's'}${
+          plannedCount > 0 ? ` · ${plannedCount} to tick off` : ''
+        }${session.completedAt ? ' · Completed' : ''}`}
       />
 
       <Button variant="primary" className="mb-3 w-full" onClick={() => navigate(`/session/${session.id}/add`)}>
@@ -229,18 +269,46 @@ export function Session() {
         </div>
       )}
 
+      {askAboutPlanned && !session.completedAt && (
+        <Card className="mt-5" style={{ borderColor: 'var(--accent)' }}>
+          <p className="mb-1 text-sm font-medium">
+            {plannedCount} set{plannedCount === 1 ? '' : 's'} not ticked off
+          </p>
+          <p className="mb-3 text-xs" style={{ color: 'var(--text-muted)' }}>
+            {doneCount > 0
+              ? 'Count them as done, or leave them out of this workout?'
+              : "You haven't ticked off anything yet."}
+          </p>
+          <div className="flex flex-col gap-2">
+            <Button variant="primary" onClick={() => complete('keep')}>
+              Count them as done
+            </Button>
+            {doneCount > 0 ? (
+              <Button onClick={() => complete('discard')}>Leave them out</Button>
+            ) : (
+              <Button
+                variant="danger"
+                onClick={() => {
+                  deleteSession(session.id)
+                  navigate('/')
+                }}
+              >
+                Discard this session
+              </Button>
+            )}
+            <Button variant="ghost" onClick={() => setAskAboutPlanned(false)}>
+              Keep going
+            </Button>
+          </div>
+        </Card>
+      )}
+
       <div className="mt-5 flex gap-2">
-        {!session.completedAt && (
+        {!session.completedAt && !askAboutPlanned && (
           <Button
             variant="primary"
             className="flex-1"
-            onClick={() => {
-              finishSession(session.id)
-              setCelebrateFire((f) => f + 1)
-              // Brief pause so the celebration is actually visible before
-              // navigating away, rather than firing and immediately unmounting.
-              setTimeout(() => navigate('/history'), 700)
-            }}
+            onClick={() => (plannedCount > 0 ? setAskAboutPlanned(true) : complete('discard'))}
           >
             Finish session
           </Button>

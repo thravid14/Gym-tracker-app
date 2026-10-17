@@ -1,9 +1,12 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppState } from '../state/AppState'
 import { HistoryTabs } from '../components/HistoryTabs'
-import { Card, EmptyState, PageHeader } from '../components/ui'
+import { SkipForm } from '../components/SkipForm'
+import { Button, Card, EmptyState, PageHeader } from '../components/ui'
 import { useCountUp } from '../hooks/useCountUp'
+import { dateFromKey } from '../lib/dates'
+import type { SkippedDay, WorkoutSession } from '../types'
 
 function daysAgo(iso: string): number {
   return (Date.now() - new Date(iso).getTime()) / 86_400_000
@@ -21,9 +24,14 @@ function StatCard({ label, value }: { label: string; value: number }) {
   )
 }
 
+type Entry =
+  | { kind: 'session'; at: number; session: WorkoutSession }
+  | { kind: 'skip'; at: number; skip: SkippedDay }
+
 export function History() {
-  const { sessions } = useAppState()
+  const { sessions, skippedDays, removeSkippedDay } = useAppState()
   const navigate = useNavigate()
+  const [showSkipForm, setShowSkipForm] = useState(false)
 
   const completed = useMemo(
     () => sessions.filter((s) => s.completedAt).sort((a, b) => b.date.localeCompare(a.date)),
@@ -35,8 +43,29 @@ export function History() {
       total: completed.length,
       last7: completed.filter((s) => daysAgo(s.date) <= 7).length,
       last30: completed.filter((s) => daysAgo(s.date) <= 30).length,
+      skipped7: skippedDays.filter((s) => daysAgo(dateFromKey(s.date).toISOString()) <= 7).length,
+      skipped30: skippedDays.filter((s) => daysAgo(dateFromKey(s.date).toISOString()) <= 30).length,
     }),
-    [completed],
+    [completed, skippedDays],
+  )
+
+  // Workouts and skipped days on one timeline, newest first. A skipped day sorts
+  // at local noon, so a same-day workout (started any time) never ties with it.
+  const entries = useMemo<Entry[]>(
+    () =>
+      [
+        ...completed.map((session): Entry => ({
+          kind: 'session',
+          at: new Date(session.date).getTime(),
+          session,
+        })),
+        ...skippedDays.map((skip): Entry => ({
+          kind: 'skip',
+          at: dateFromKey(skip.date).getTime(),
+          skip,
+        })),
+      ].sort((a, b) => b.at - a.at),
+    [completed, skippedDays],
   )
 
   return (
@@ -44,17 +73,73 @@ export function History() {
       <PageHeader title="History" subtitle="Your consistency log." />
       <HistoryTabs />
 
-      <div className="mb-4 grid grid-cols-3 gap-2 text-center">
+      <div className="mb-2 grid grid-cols-3 gap-2 text-center">
         <StatCard label="Total" value={stats.total} />
         <StatCard label="Last 7 days" value={stats.last7} />
         <StatCard label="Last 30 days" value={stats.last30} />
       </div>
+      {(stats.skipped7 > 0 || stats.skipped30 > 0) && (
+        <p className="mb-4 text-center text-xs" style={{ color: 'var(--text-muted)' }}>
+          Skipped: {stats.skipped7} in the last 7 days · {stats.skipped30} in the last 30
+        </p>
+      )}
 
-      {completed.length === 0 ? (
+      <div className="mb-3 mt-2">
+        {showSkipForm ? (
+          <SkipForm onDone={() => setShowSkipForm(false)} />
+        ) : (
+          <Button className="w-full" onClick={() => setShowSkipForm(true)}>
+            + Log a skipped day
+          </Button>
+        )}
+      </div>
+
+      {entries.length === 0 ? (
         <EmptyState>No completed sessions yet. Finish a workout and it'll show up here.</EmptyState>
       ) : (
         <div className="flex flex-col gap-2">
-          {completed.map((s) => {
+          {entries.map((entry) => {
+            if (entry.kind === 'skip') {
+              const { skip } = entry
+              const detail = [skip.splitDayLabel, skip.reason].filter(Boolean).join(' · ')
+              return (
+                <Card
+                  key={skip.id}
+                  className="flex items-center justify-between"
+                  style={{ borderStyle: 'dashed', background: 'transparent' }}
+                >
+                  <div>
+                    <p className="font-medium" style={{ color: 'var(--text-muted)' }}>
+                      Skipped
+                    </p>
+                    {detail && (
+                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        {detail}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      {dateFromKey(skip.date).toLocaleDateString(undefined, {
+                        weekday: 'short',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </p>
+                    <button
+                      aria-label="Remove skipped day"
+                      className="px-1 text-xs"
+                      style={{ color: 'var(--danger)' }}
+                      onClick={() => removeSkippedDay(skip.id)}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </Card>
+              )
+            }
+
+            const s = entry.session
             const totalSets = s.exercises.reduce((n, e) => n + e.sets.length, 0)
             return (
               <Card key={s.id} className="cursor-pointer" onClick={() => navigate(`/session/${s.id}`)}>
