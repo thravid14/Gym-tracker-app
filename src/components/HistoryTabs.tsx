@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 
 const tabs = [
   { to: '/history', label: 'Sessions' },
+  { to: '/history/records', label: 'Records' },
   { to: '/history/volume', label: 'Volume' },
   { to: '/history/bodyweight', label: 'Body weight' },
 ]

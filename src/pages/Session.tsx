@@ -1,6 +1,8 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAppState } from '../state/AppState'
+import { usePRs } from '../hooks/usePRs'
+import { PR_LABELS, type PRKind } from '../lib/records'
 import { suggestNextSet } from '../lib/suggestions'
 import { Button, Card, EmptyState, PageHeader } from '../components/ui'
 import { Celebration } from '../components/Celebration'
@@ -11,15 +13,18 @@ function SetRow({
   exerciseId,
   index,
   set,
+  pr,
 }: {
   sessionId: string
   exerciseId: string
   index: number
   set: { id: string; reps: number; weight: number; planned?: boolean }
+  pr?: PRKind
 }) {
   const { updateSet, removeSet, confirmSet } = useAppState()
   const planned = !!set.planned
   return (
+    <div>
     <div className="flex items-center gap-2 text-sm" style={{ opacity: planned ? 0.65 : 1 }}>
       {/* Tick circle: shows the set number while still planned, a check once logged. */}
       <button
@@ -66,10 +71,24 @@ function SetRow({
         ✕
       </button>
     </div>
+    {pr && (
+      <p className="ml-8 mt-0.5 text-xs font-semibold" style={{ color: '#eab308' }}>
+        🏆 {PR_LABELS[pr]}
+      </p>
+    )}
+    </div>
   )
 }
 
-function ExerciseBlock({ sessionId, logged }: { sessionId: string; logged: LoggedExercise }) {
+function ExerciseBlock({
+  sessionId,
+  logged,
+  setPRs,
+}: {
+  sessionId: string
+  logged: LoggedExercise
+  setPRs?: Map<string, PRKind>
+}) {
   const { addSet, removeExerciseFromSession, getExerciseHistory, confirmAllSets } = useAppState()
   const navigate = useNavigate()
   const hasPlanned = logged.sets.some((s) => s.planned)
@@ -151,7 +170,14 @@ function ExerciseBlock({ sessionId, logged }: { sessionId: string; logged: Logge
 
       <div className="flex flex-col gap-1.5">
         {logged.sets.map((s, i) => (
-          <SetRow key={s.id} sessionId={sessionId} exerciseId={logged.id} index={i} set={s} />
+          <SetRow
+            key={s.id}
+            sessionId={sessionId}
+            exerciseId={logged.id}
+            index={i}
+            set={s}
+            pr={setPRs?.get(s.id)}
+          />
         ))}
       </div>
 
@@ -218,6 +244,16 @@ export function Session() {
 
   const session = sessions.find((s) => s.id === sessionId)
 
+  // Celebrate when a new PR lands during this visit — not for PRs that were
+  // already there when the page opened, so reopening a session stays quiet.
+  const setPRs = usePRs().setPRs.get(sessionId ?? '')
+  const prCount = setPRs?.size ?? 0
+  const prevPRCount = useRef(prCount)
+  useEffect(() => {
+    if (prCount > prevPRCount.current) setCelebrateFire((f) => f + 1)
+    prevPRCount.current = prCount
+  }, [prCount])
+
   if (!session) {
     return (
       <div className="flex-1 p-4">
@@ -264,7 +300,7 @@ export function Session() {
       ) : (
         <div className="flex flex-col gap-3">
           {session.exercises.map((logged) => (
-            <ExerciseBlock key={logged.id} sessionId={session.id} logged={logged} />
+            <ExerciseBlock key={logged.id} sessionId={session.id} logged={logged} setPRs={setPRs} />
           ))}
         </div>
       )}

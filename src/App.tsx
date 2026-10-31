@@ -8,6 +8,7 @@ import { ExercisePicker } from './pages/ExercisePicker'
 import { History } from './pages/History'
 import { ExerciseHistory } from './pages/ExerciseHistory'
 import { ExerciseLibrary } from './pages/ExerciseLibrary'
+import { Records } from './pages/Records'
 import { Volume } from './pages/Volume'
 import { BodyWeight } from './pages/BodyWeight'
 
@@ -24,6 +25,7 @@ function AnimatedRoutes() {
         <Route path="/session/:sessionId" element={<Session />} />
         <Route path="/session/:sessionId/add" element={<ExercisePicker />} />
         <Route path="/history" element={<History />} />
+        <Route path="/history/records" element={<Records />} />
         <Route path="/history/volume" element={<Volume />} />
         <Route path="/history/bodyweight" element={<BodyWeight />} />
         <Route path="/history/exercise/:exerciseId" element={<ExerciseHistory />} />

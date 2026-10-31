@@ -6,6 +6,7 @@ import { SkipForm } from '../components/SkipForm'
 import { StreakCard } from '../components/StreakCard'
 import { Button, Card, EmptyState, PageHeader } from '../components/ui'
 import { useCountUp } from '../hooks/useCountUp'
+import { usePRs } from '../hooks/usePRs'
 import { dateFromKey } from '../lib/dates'
 import type { SkippedDay, WorkoutSession } from '../types'
 
@@ -31,6 +32,7 @@ type Entry =
 
 export function History() {
   const { sessions, skippedDays, removeSkippedDay } = useAppState()
+  const { setPRs } = usePRs()
   const navigate = useNavigate()
   const [showSkipForm, setShowSkipForm] = useState(false)
 
@@ -144,6 +146,7 @@ export function History() {
 
             const s = entry.session
             const totalSets = s.exercises.reduce((n, e) => n + e.sets.length, 0)
+            const prCount = setPRs.get(s.id)?.size ?? 0
             return (
               <Card key={s.id} className="cursor-pointer" onClick={() => navigate(`/session/${s.id}`)}>
                 <div className="flex items-center justify-between">
@@ -158,6 +161,11 @@ export function History() {
                 </div>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                   {s.exercises.length} exercise{s.exercises.length === 1 ? '' : 's'} · {totalSets} sets
+                  {prCount > 0 && (
+                    <span className="font-semibold" style={{ color: '#eab308' }}>
+                      {' · '}🏆 {prCount} PR{prCount === 1 ? '' : 's'}
+                    </span>
+                  )}
                 </p>
               </Card>
             )
