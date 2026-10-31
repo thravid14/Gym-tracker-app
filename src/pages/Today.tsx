@@ -4,6 +4,7 @@ import { useAppState } from '../state/AppState'
 import { formatMuscle } from '../lib/exercises'
 import { localDateKey } from '../lib/dates'
 import { SkipForm } from '../components/SkipForm'
+import { StreakCard } from '../components/StreakCard'
 import { Button, Card, EmptyState, PageHeader } from '../components/ui'
 
 export function Today() {
@@ -32,6 +33,8 @@ export function Today() {
   return (
     <div className="flex-1 p-4">
       <PageHeader title="Today" subtitle={todayLabel} />
+
+      <StreakCard className="mb-4" />
 
       {activeSession && (
         <Card className="mb-4" style={{ borderColor: 'var(--accent)' }}>

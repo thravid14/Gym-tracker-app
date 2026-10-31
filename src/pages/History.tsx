@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAppState } from '../state/AppState'
 import { HistoryTabs } from '../components/HistoryTabs'
 import { SkipForm } from '../components/SkipForm'
+import { StreakCard } from '../components/StreakCard'
 import { Button, Card, EmptyState, PageHeader } from '../components/ui'
 import { useCountUp } from '../hooks/useCountUp'
 import { dateFromKey } from '../lib/dates'
@@ -72,6 +73,8 @@ export function History() {
     <div className="flex-1 p-4">
       <PageHeader title="History" subtitle="Your consistency log." />
       <HistoryTabs />
+
+      <StreakCard className="mb-3" />
 
       <div className="mb-2 grid grid-cols-3 gap-2 text-center">
         <StatCard label="Total" value={stats.total} />
